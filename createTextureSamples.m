@@ -1,4 +1,4 @@
-function data = testaaLBP(lahde)
+function data = createTextureSamples(lahde)
     
     global data notDone esa;
     addpath('LBP'); %Add LBP functions to path
@@ -20,9 +20,10 @@ function data = testaaLBP(lahde)
        data(i).variance= cont(data(i).data,2,16,1:200:4000); 
        MAPPING=getmapping(16,'riu2');
        data(i).lbp=lbp(data(i).data,2,16,MAPPING,'matrix');
+       data(i).data(340:390,170:300) = data(i).data(340:390,170:300)+300;
     end
     esa = figure;
-    sliceToShow = 1;
+    sliceToShow = 7;
     i = 1;
     f(1) = subplot(1,3,i);
     i = i+1;
@@ -37,7 +38,7 @@ function data = testaaLBP(lahde)
      notDone = 1;
     set(esa,'position',[10 10 1800 600],'visible','on','CloseRequestFcn',@doneWithTheStack);    %Wait for the work to be done
     slaideri = uicontrol(esa,'style','slider','min',1,'max', length(info)+0.99, ...
-        'value',1,'callback',@setFig, ...
+        'value',sliceToShow,'callback',@setFig, ...
         'units','normalized','position',[0.2,0.05,0.6,0.05],'sliderstep',[1/(length(info)-1) 1/(length(info)-1)]);
     %Wait for the user to finish with the stack...
     while notDone
