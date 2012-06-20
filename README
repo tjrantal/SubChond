@@ -1,0 +1,5 @@
+Project for analysing tibial subchondral bone pixel values from t1 spin echo MRI images.
+
+Currently trying to automate segmenting trabecular bone from the images. Working on using LBP textural analysis as outlined in (http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_6.pdf).
+
+LBP functions downloaded from Center for Machine Vision Research website (http://www.cse.oulu.fi/CMV/Downloads)
