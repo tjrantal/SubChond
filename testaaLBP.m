@@ -14,10 +14,12 @@ function data = testaaLBP(lahde)
     [values,jarjestys] = sort([info().SliceLocation]);
   
     filter = fspecial('gaussian',5,1);
+    
+    binCutpoints = [203.265584365132,289.016577202241,366.310454646066,443.357000717588,523.854509353765,609.266961172952,704.389742210883,807.637243792730,925.894010147273,1064.78032237981,1236.73822169619,1457.33059878462,1760.15965964240,2231.98799250700,3206.62813383521;];
     for i = 1:length(info)
        data(i).data = double(dicomread(info(jarjestys(i))));
        data(i).data = conv2(data(i).data,filter);
-       data(i).variance= cont(data(i).data,2,16,1:200:4000); 
+       data(i).variance= cont(data(i).data,2,16,binCutpoints); 
        MAPPING=getmapping(16,'riu2');
        data(i).lbp=lbp(data(i).data,2,16,MAPPING,'matrix');
     end
