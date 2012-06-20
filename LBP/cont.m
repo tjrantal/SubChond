@@ -146,17 +146,23 @@ result=M2/(neighbors-1);
 if lims
     [q r s]=size(result);
     quant_vector=q_(result(:),lims);
+%     keyboard
     result=reshape(quant_vector,q,r,s);
     if strcmp(mode,'h')
         % Return histogram
-        result=hist(result, length(lims)-1);
+%         keyboard
+        result=hist(result(:), length(lims)+1);
     end
     
 end
 
-if strcmp(mode,'h') && ~lims
+
+if strcmp(mode,'h') && length(lims) ==1
+%     keyboard
     % Return histogram
     %epoint = round(max(result(:)));
+    [q r s]=size(result);
+    result=reshape(result,1,q*r*s);
     result=hist(result(:),0:1:1e4);
 end
 

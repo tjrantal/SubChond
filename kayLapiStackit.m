@@ -50,3 +50,17 @@ close(esa);
 % binCutpoints = allVarianceSamples(binIndices(2:16));
 % test = hist(allVarianceSamples,binCutpoints)
 % plot(test)
+
+%Calculate mean histograms for local variance and for LBP
+lbpSumHistogram = zeros(1,18);
+varianceSumHistogram = zeros(1,16);
+
+for s = 1:length(samples)
+    for t = 1:length(samples(s).textureSample)
+        lbpSumHistogram = lbpSumHistogram+samples(s).textureSample(t).lbpHist;
+        varianceSumHistogram = varianceSumHistogram+samples(s).textureSample(t).varianceHist;
+    end
+end
+
+lbpSumHistogram = lbpSumHistogram/(sum(lbpSumHistogram));
+varianceSumHistogram = varianceSumHistogram/(sum(varianceSumHistogram));
