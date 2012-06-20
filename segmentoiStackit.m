@@ -11,11 +11,13 @@ constants.varianceSumHistogram = [0.0625036453776611,0.0625036453776611,0.062496
 hakemistot = dir(lahde);
 samples = struct();
 for i = 3:length(hakemistot)
+        %Tähän funktio, jolla segmentointi lähdetään tekemään!!!
+        %Tee ensiksi esim. 16 x 16 neighborhoodeilla
+        %Laske koko kuvalle LBP-arvot ja var -arvot -> tee histogrammit
+        %itse, jotta ei lasketa pikseleitä satoja kertoja?
+        %Kokeile ensin kuitenkin vain syöttää 16x16 blokkeja ilman 
+        %laskennassa säästämistä...
+        %Voisi myös kokeilla ympyräblokkeja?
 %     data = createTextureSamples([lahde hakemistot(i).name]);
-      
-      samples(i-2).textureSample = extractTextureSamples([lahde hakemistot(i).name]);
-      disp(['Extracted ' num2str(i-2) ' of ' num2str(length(hakemistot)-2)]);
+      disp(['Segmented ' num2str(i-2) ' of ' num2str(length(hakemistot)-2)]);
 end
-
-lbpSumHistogram = lbpSumHistogram/(sum(lbpSumHistogram));
-varianceSumHistogram = varianceSumHistogram/(sum(varianceSumHistogram));
