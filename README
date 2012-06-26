@@ -8,4 +8,6 @@ N.B. it is rather questionable whether subchondral bone pixel intensities may gi
 Currently trying to automate segmenting trabecular bone from the images. Working on using LBP textural analysis as outlined in (http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_6.pdf). Added just regular histogram to the measures, as the image indices are normalized b the MRI device and similar tissue produce similar pixel values in different subjects.
 
 TODO NEXT
-Browse through the segmented masks and select the one with the most selected. Select the blob which is sufficiently large and has the best area to circumference ratio -> grow region into neighboring slices from there and dilate if necessary to include voxels missed by the segmentation.
+Grow region into neighboring slices from there and dilate if necessary to include voxels missed by the segmentation.
+
+Test whether simply using 3D neighbourhood histogram suffices for segmentation. 3D LBP might be more useful than the 2D LBP used thus far.
