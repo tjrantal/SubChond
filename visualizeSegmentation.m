@@ -13,7 +13,7 @@ for kh = 1:10
         set(esa,'currentaxes',f(i));,i = i+1;
         imshow(mat2gray(data.segmented.segmentedStack(s).data));
         set(esa,'currentaxes',f(i));,i = i+1;
-        imshow(mat2gray(data.segmented.segmentedStack(s).mask));
+        imshow(mat2gray(imfill(data.segmented.segmentedStack(s).mask)));
         set(esa,'currentaxes',f(i));,i = i+1;
         imshow(mat2gray(data.segmented.segmentedStack(s).vCloseness));
         set(esa,'currentaxes',f(i));,i = i+1;
