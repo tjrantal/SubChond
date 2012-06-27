@@ -41,12 +41,23 @@ function visualize3DsegmentationResult
         
         %Select second largest volume. The largest is femur, second largest
         %tibia...
+        %check whether femur was found at all...
+        
         for v = 1:2
             [biggest,idx] = max(numPixels);
+            [X,Y,Z] = ind2sub(size(segment3d),ConnectedVolumes.PixelIdxList{idx});
+            centre(:,v) = [mean(X),mean(Y),mean(Z)];
+            objectInd(v) = idx;
             numPixels(idx) = 0;
         end
+        if centre(1,1) < 300
+            selectedObject = objectInd(2);
+        else
+            selectedObject = objectInd(1);
+        end
+
         segmentedVolume = zeros(size(segment3d,1),size(segment3d,2),size(segment3d,3));
-        segmentedVolume(ConnectedVolumes.PixelIdxList{idx}) = 1;
+        segmentedVolume(ConnectedVolumes.PixelIdxList{selectedObject}) = 1;
         initR = floor((size(data3d,1)-size(segmentedVolume,1))/2)+1;
         initC = floor((size(data3d,2)-size(segmentedVolume,2))/2)+1;
         %Remove edges from original data to match the segmented data...

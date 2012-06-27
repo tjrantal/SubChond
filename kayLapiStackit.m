@@ -15,26 +15,26 @@ for i = 3:length(hakemistot)
 end
 save('samples.mat','samples');
 
-%Visualize samples
-% esa = figure;
-% set(gcf,'position',[10 10 1200 500]);
-% i = 1;
-% for i = 1:3
-%     f(i) = subplot(1,3,i);
-% end
-% for s = 1:length(samples)
-%     for t = 1:length(samples(s).textureSample)
-%          set(esa,'currentaxes',f(1));
-%          imshow(samples(s).textureSample(t).data,[]);
-%          set(esa,'currentaxes',f(2));
-%          plot(samples(s).textureSample(t).varianceHist,'r');
-%          set(esa,'currentaxes',f(3));
-%          plot(samples(s).textureSample(t).lbpHist,'r');
-%          drawnow
-%          pause(0.5)
-%     end
-% end
-% close(esa);
+% Visualize samples
+esa = figure;
+set(gcf,'position',[10 10 1200 500]);
+i = 1;
+for i = 1:3
+    f(i) = subplot(1,3,i);
+end
+for s = 1:length(samples)
+    for t = 1:length(samples(s).textureSample)
+         set(esa,'currentaxes',f(1));
+         imshow(samples(s).textureSample(t).data,[]);
+         set(esa,'currentaxes',f(2));
+         plot(samples(s).textureSample(t).varianceHist,'r');
+         set(esa,'currentaxes',f(3));
+         plot(samples(s).textureSample(t).lbpHist,'r');
+         drawnow
+         pause
+    end
+end
+close(esa);
 
 % %Calculate histogram bins for local variance
 % allVarianceSamples = [];
