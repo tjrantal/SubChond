@@ -4,8 +4,7 @@ function visualize3DsegmentationResult
     clc;
    
     global segmentedVolume data3d data3v data3l data3g notDone imageHandle subHandle constants;
-          addpath('LBP'); %Add LBP functions to path
-          constants.lbpMapping=getmapping(16,'riu2');
+        
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
     for kh = 1:10
@@ -71,9 +70,9 @@ function visualize3DsegmentationResult
         %Remove edges from original data to match the segmented data...
         data3d = data3d(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
          %3D dilate
-%          disp('Starting flooding');
-%         segmentedVolume  = flood3d(data3d,segmentedVolume);
-%         disp('Flooded');
+         disp('Starting flooding');
+        segmentedVolume  = flood3d(segmentedVolume);
+        disp('Flooded');
         data3d = data3d/(2*max(max(max(data3d))));
         data3d(find(segmentedVolume ==1)) = data3d(find(segmentedVolume ==1))+0.1;
         esa = figure;
@@ -151,7 +150,7 @@ function visualize3DsegmentationResult
         delete(esa);
     end
 
-    function dilated = flood3d(data3d,segmentedVolume)
+    function dilated = flood3d(segmentedVolume)
         
        meanGrayScale    = mean(data3d(find(segmentedVolume ==1)));
        stdGrayScale     = 3*std(data3d(find(segmentedVolume ==1)));
@@ -164,14 +163,11 @@ function visualize3DsegmentationResult
                tempSlice(1,:) = 0;
                tempSlice(size(tempSlice,1),:) = 0;
                tempSlice(:,size(tempSlice,2)) = 0;
-               tempLBP = zeros(size(tempSlice,1),size(tempSlice,2));
-               
-               tempLBP(8:size(tempSlice,1)-8,8:size(tempSlice,2)-8) = lbp(tempSlice,2,16,constants.lbpMapping,'matrix');
-               boundary = bwboundaries(tempSlice,'noholes');
-               for b = 1:length(boundary)
-                   for ii = 1:length(boundary{b})
-                       r = boundary{b}(ii,1);
-                       c = boundary{b}(ii,2);
+               boundaries = bwboundaries(tempSlice,'noholes');
+               for b = 1:length(boundaries)
+                   for ii = 1:length(boundaries{b})
+                       r = boundaries{b}(ii,1);
+                       c = boundaries{b}(ii,2);
     %                    [r,c] = ind2sub(size(dilated),init(ii));
                        tempR = r;
                        tempC = c;
@@ -185,30 +181,34 @@ function visualize3DsegmentationResult
                                     dilated(r,c,s) =1;
                                 end
                                 %check whether the neighbour to the left should be added to the queue
-                                if dilated(r,c-1,s) == 0 && data3d(r,c-1,s) > (meanGrayScale-stdGrayScale) && data3d(r,c-1,s) < (meanGrayScale+stdGrayScale)
-                                    tempR = [tempR r];
-                                    tempC = [tempC c-1];
-                                end
+                                lr = r;
+                                lc = c-1;
+                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+                                
                                 %check whether the neighbour to the right should be added to the queue
-                                if dilated(r,c+1,s) == 0 && data3d(r,c+1,s) > (meanGrayScale-stdGrayScale) && data3d(r,c+1,s) < (meanGrayScale+stdGrayScale)
-                                    tempR = [tempR r];
-                                    tempC = [tempC c+1];
-                                end
+                                lc = c+1;
+                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+                                
                                 %check whether the neighbour to above should be added to the queue
-                                if dilated(r-1,c,s) == 0 && data3d(r-1,c,s) > (meanGrayScale-stdGrayScale) && data3d(r-1,c,s) < (meanGrayScale+stdGrayScale)
-                                    tempR = [tempR r-1];
-                                    tempC = [tempC c];
-                                end
+                                lr = r-1;
+                                lc = c;
+                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+                                
                                 %check whether the neighbour to below should be added to the queue
-                                if dilated(r+1,c,s) == 0 && data3d(r+1,c,s) > (meanGrayScale-stdGrayScale) && data3d(r+1,c,s) < (meanGrayScale+stdGrayScale)
-                                    tempR = [tempR r+1];
-                                    tempC = [tempC c];
-                                end
+                                lr = r+1;
+                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
                             end
                         end
                    end
                end
            end
+        end
+    end
+
+    function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
+         if dilated(lr,lc,s) == 0 && (data3v(lr,lc,s) > 0.8 || data3l(lr,lc,s) > 0.8 || data3g(lr,lc,s) > 0.8)
+            tempR = [tempR lr];
+            tempC = [tempC lc];
         end
     end
 end
