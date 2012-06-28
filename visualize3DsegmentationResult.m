@@ -7,7 +7,7 @@ function visualize3DsegmentationResult
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
-    for kh = 1:10
+    for kh = 1%:10
         data = load(['Segmented' num2str(kh) '.mat']);
         
         %Original data
@@ -70,9 +70,9 @@ function visualize3DsegmentationResult
         %Remove edges from original data to match the segmented data...
         data3d = data3d(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
          %3D dilate
-         disp('Starting flooding');
-        segmentedVolume  = flood3d(segmentedVolume);
-        disp('Flooded');
+%          disp('Starting flooding');
+%         segmentedVolume  = flood3d(segmentedVolume);
+%         disp('Flooded');
         data3d = data3d/(2*max(max(max(data3d))));
         data3d(find(segmentedVolume ==1)) = data3d(find(segmentedVolume ==1))+0.1;
         esa = figure;
@@ -206,7 +206,11 @@ function visualize3DsegmentationResult
     end
 
     function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
-         if dilated(lr,lc,s) == 0 && (data3v(lr,lc,s) > 0.8 || data3l(lr,lc,s) > 0.8 || data3g(lr,lc,s) > 0.8)
+         if dilated(lr,lc,s) == 0 && ( ...
+                (data3v(lr,lc,s) > 0.7 && data3l(lr,lc,s) > 0.7) ...
+             || (data3v(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
+             || (data3l(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
+             )
             tempR = [tempR lr];
             tempC = [tempC lc];
         end

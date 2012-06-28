@@ -6,7 +6,7 @@ set(esa,'position',[10 400 1800 600]);
 for i = 1:6
     f(i)=subplot(2,3,i);
 end
-for kh = 1:10
+for kh = 1%:10
     data = load(['Segmented' num2str(kh) '.mat']);
     for s = 1:length(data.segmented.segmentedStack)
         i = 1;
