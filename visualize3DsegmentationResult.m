@@ -3,7 +3,7 @@ function visualize3DsegmentationResult
     close all;
     clc;
    
-    global segmentedVolume data3d notDone imageHandle constants;
+    global segmentedVolume data3d data3v data3l data3g notDone imageHandle subHandle constants;
           addpath('LBP'); %Add LBP functions to path
           constants.lbpMapping=getmapping(16,'riu2');
     nHood = strel('disk',2);
@@ -13,9 +13,15 @@ function visualize3DsegmentationResult
         
         %Original data
         data3d = zeros(size(data.segmented.segmentedStack(1).data,1),size(data.segmented.segmentedStack(1).data,2),length(data.segmented.segmentedStack));
+        data3v = zeros(size(data.segmented.segmentedStack(1).vCloseness,1),size(data.segmented.segmentedStack(1).vCloseness,2),length(data.segmented.segmentedStack));
+        data3l = zeros(size(data.segmented.segmentedStack(1).lCloseness,1),size(data.segmented.segmentedStack(1).lCloseness,2),length(data.segmented.segmentedStack));
+        data3g = zeros(size(data.segmented.segmentedStack(1).gCloseness,1),size(data.segmented.segmentedStack(1).gCloseness,2),length(data.segmented.segmentedStack));
         %Get 3D stack and fill voids
         for s = 1:length(data.segmented.segmentedStack)
            data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
+           data3v(:,:,s) =  data.segmented.segmentedStack(s).vCloseness;
+           data3l(:,:,s) =  data.segmented.segmentedStack(s).lCloseness;
+           data3g(:,:,s) =  data.segmented.segmentedStack(s).gCloseness;           
         end
         
         %Segmented data
@@ -65,15 +71,37 @@ function visualize3DsegmentationResult
         %Remove edges from original data to match the segmented data...
         data3d = data3d(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
          %3D dilate
-         disp('Starting flooding');
-        segmentedVolume  = flood3d(data3d,segmentedVolume);
-        disp('Flooded');
+%          disp('Starting flooding');
+%         segmentedVolume  = flood3d(data3d,segmentedVolume);
+%         disp('Flooded');
         data3d = data3d/(2*max(max(max(data3d))));
-        data3d(find(segmentedVolume ==1)) = data3d(find(segmentedVolume ==1))+0.5;
+        data3d(find(segmentedVolume ==1)) = data3d(find(segmentedVolume ==1))+0.1;
         esa = figure;
+        for i = 1:2
+           subHandle(i) = subplot(1,2,i); 
+        end
         sliceToShow = 1;
-        imageHandle = imshow(squeeze(data3d(:,:,sliceToShow)),[]);
+        i = 1;
+        set(esa,'currentaxes',subHandle(i));
+        imageHandle(i) = imshow(squeeze(data3d(:,:,sliceToShow)),[]);
          title(['Fig ' num2str(sliceToShow)]);
+         i=i+1;
+
+%         set(esa,'currentaxes',subHandle(i));
+%         imageHandle(i) = imshow(squeeze(data3v(:,:,sliceToShow)),[]);
+%          title(['Fig v' num2str(sliceToShow)]);
+%          i=i+1;
+
+                 set(esa,'currentaxes',subHandle(i));
+        imageHandle(i) = imshow(squeeze(data3l(:,:,sliceToShow)),[]);
+         title(['Fig l' num2str(sliceToShow)]);
+         i=i+1;
+         
+%                           set(esa,'currentaxes',subHandle(i));
+%         imageHandle(i) = imshow(squeeze(data3g(:,:,sliceToShow)),[]);
+%          title(['Fig l' num2str(sliceToShow)]);
+%          i=i+1;
+         
          notDone = 1;
         set(esa,'position',[10 10 800 800],'visible','on','CloseRequestFcn',@doneWithTheStack);    %Wait for the work to be done
         slaideri = uicontrol(esa,'style','slider','min',1,'max', length(data.segmented.segmentedStack)+0.99, ...
@@ -88,8 +116,34 @@ function visualize3DsegmentationResult
     
     function setFig(obj,evt)
         sliceToShow = floor(get(obj,'Value'));
-        set(imageHandle,'CData',squeeze(data3d(:,:,sliceToShow)));
-        title(['Fig ' num2str(sliceToShow)]);
+        
+               i = 1;
+        set(esa,'currentaxes',subHandle(i));
+         set(imageHandle(i),'CData',squeeze(data3d(:,:,sliceToShow)));
+         title(['Fig ' num2str(sliceToShow)]);
+         i=i+1;
+
+%         set(esa,'currentaxes',subHandle(i));
+%         set(imageHandle(i),'CData',squeeze(data3v(:,:,sliceToShow)));
+%          title(['Fig v' num2str(sliceToShow)]);
+%          i=i+1;
+
+         set(esa,'currentaxes',subHandle(i));
+         toPlot = squeeze(data3l(:,:,sliceToShow));
+         toPlot2 = squeeze(data3v(:,:,sliceToShow));
+         toPlot2(find(toPlot2 < 0.7)) = 0;
+         toPlot3 = squeeze(data3g(:,:,sliceToShow));
+         toPlot3(find(toPlot3 < 0.7)) = 0;
+         toPlot(find(toPlot < 0.7)) = 0;
+         set(imageHandle(i),'CData',mat2gray(toPlot+toPlot2+toPlot3));
+         title(['Fig l' num2str(sliceToShow)]);
+         i=i+1;
+         
+%           set(esa,'currentaxes',subHandle(i));
+%           set(imageHandle(i),'CData',squeeze(data3g(:,:,sliceToShow)));
+%          title(['Fig g' num2str(sliceToShow)]);
+%          i=i+1;
+
     end
 
     function doneWithTheStack(obj,evt)
@@ -110,6 +164,9 @@ function visualize3DsegmentationResult
                tempSlice(1,:) = 0;
                tempSlice(size(tempSlice,1),:) = 0;
                tempSlice(:,size(tempSlice,2)) = 0;
+               tempLBP = zeros(size(tempSlice,1),size(tempSlice,2));
+               
+               tempLBP(8:size(tempSlice,1)-8,8:size(tempSlice,2)-8) = lbp(tempSlice,2,16,constants.lbpMapping,'matrix');
                boundary = bwboundaries(tempSlice,'noholes');
                for b = 1:length(boundary)
                    for ii = 1:length(boundary{b})
