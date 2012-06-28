@@ -16,7 +16,7 @@ function segmentedStack = segmentStack(lahde,constants)
     varCutPoints = 0:15;
     lbpBlockSize = 15; %Use lbpBlockSize+1 x lbpBlockSize+1 sample for lbp
     for i = 1:length(info) %Go through the whole stack
-        
+       segmentedStack(i).info = info(jarjestys(i));
        data = double(dicomread(info(jarjestys(i))));
        data = conv2(data,constants.filter);
        segmentedStack(i).data = data;
