@@ -3,6 +3,7 @@ function visualize3DsegmentationResult
     close all;
     clc;
     addpath('max_min_filter');
+    javaaddpath('.');
     global segmentedVolume data3d data3v data3l data3g data3m notDone imageHandle subHandle constants;
         
     nHood = strel('disk',2);
@@ -25,7 +26,7 @@ function visualize3DsegmentationResult
            tempMin = minfilt2(squeeze(data3d(:,:,s)),5,'same');
            data3m(:,:,s) = tempMin/max(max(tempMin));
         end
-        
+%         keyboard;
         %Segmented data
         segment3d = zeros(size(data.segmented.segmentedStack(1).mask,1),size(data.segmented.segmentedStack(1).mask,2),length(data.segmented.segmentedStack));
         %Get 3D stack and fill voids
@@ -72,7 +73,10 @@ function visualize3DsegmentationResult
         initC = floor((size(data3d,2)-size(segmentedVolume,2))/2)+1;
         %Remove edges from original data to match the segmented data...
         data3d = data3d(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
+        data3m = data3m(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
+        data3m = data3m/max(max(max(data3m)));
          %3D dilate
+%           keyboard;
          disp('Starting flooding');
         segmentedVolume  = flood3d(segmentedVolume);
         disp('Flooded');
@@ -95,7 +99,7 @@ function visualize3DsegmentationResult
 %          i=i+1;
 
                  set(esa,'currentaxes',subHandle(i));
-        imageHandle(i) = imshow(squeeze(data3l(:,:,sliceToShow)),[]);
+        imageHandle(i) = imshow(squeeze(data3m(:,:,sliceToShow)),[]);
          title(['Fig l' num2str(sliceToShow)]);
          i=i+1;
          
@@ -131,15 +135,13 @@ function visualize3DsegmentationResult
 %          i=i+1;
 
          set(esa,'currentaxes',subHandle(i));
-         toPlot = squeeze(data3l(:,:,sliceToShow));
-         toPlot2 = squeeze(data3v(:,:,sliceToShow));
-         toPlot2(find(toPlot2 < 0.7)) = 0;
-         toPlot3 = squeeze(data3g(:,:,sliceToShow));
-         toPlot3(find(toPlot3 < 0.7)) = 0;
-         toPlot(find(toPlot < 0.7)) = 0;
-         minPlot = minfilt2(squeeze(data3d(:,:,sliceToShow)),5);
-         minPlot = minPlot/max(max(minPlot));
-         set(imageHandle(i),'CData',mat2gray(minPlot));
+%          toPlot = squeeze(data3l(:,:,sliceToShow));
+%          toPlot2 = squeeze(data3v(:,:,sliceToShow));
+%          toPlot2(find(toPlot2 < 0.7)) = 0;
+%          toPlot3 = squeeze(data3g(:,:,sliceToShow));
+%          toPlot3(find(toPlot3 < 0.7)) = 0;
+%          toPlot(find(toPlot < 0.7)) = 0;
+         set(imageHandle(i),'CData',mat2gray(squeeze(data3m(:,:,sliceToShow))));
          %set(imageHandle(i),'CData',mat2gray(toPlot+toPlot2+toPlot3));
          title(['Fig l' num2str(sliceToShow)]);
          i=i+1;
@@ -159,7 +161,7 @@ function visualize3DsegmentationResult
     function dilated = flood3d(segmentedVolume)
        global meanGrayScale stdGrayScale;
        meanGrayScale    = mean(data3m(find(segmentedVolume ==1)));
-       stdGrayScale     = 3*std(data3m(find(segmentedVolume ==1)));
+       stdGrayScale     = 4*std(data3m(find(segmentedVolume ==1)));
        dilated = segmentedVolume;
        for s = 1:size(dilated,3)
            init = find(dilated(:,:,s) ==1,1,'first');
@@ -175,36 +177,40 @@ function visualize3DsegmentationResult
                        r = boundaries{b}(ii,1);
                        c = boundaries{b}(ii,2);
     %                    [r,c] = ind2sub(size(dilated),init(ii));
-                       tempR = r;
-                       tempC = c;
-                        while length(tempR) > 0
-                            r = tempR(length(tempR));
-                            c = tempC(length(tempC));
-                            tempR(length(tempR)) = [];
-                            tempC(length(tempC)) = [];
-                            if r>1 && r<size(dilated,1) && c>1 && c<size(dilated,2)
-                                if dilated(r,c,s) == 0
-                                    dilated(r,c,s) =1;
-                                end
-                                %check whether the neighbour to the left should be added to the queue
-                                lr = r;
-                                lc = c-1;
-                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-                                
-                                %check whether the neighbour to the right should be added to the queue
-                                lc = c+1;
-                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-                                
-                                %check whether the neighbour to above should be added to the queue
-                                lr = r-1;
-                                lc = c;
-                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-                                
-                                %check whether the neighbour to below should be added to the queue
-                                lr = r+1;
-                                [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-                            end
-                        end
+                       javaFlooded = javaLoop.JavaDilate(squeeze(dilated(:,:,s)), squeeze(data3m(:,:,s)), r, c, [meanGrayScale-stdGrayScale meanGrayScale+stdGrayScale]);
+%                        tempR = r;
+%                        tempC = c;
+%                         while length(tempR) > 0
+%                             r = tempR(length(tempR));
+%                             c = tempC(length(tempC));
+%                             tempR(length(tempR)) = [];
+%                             tempC(length(tempC)) = [];
+%                             if r>1 && r<size(dilated,1) && c>1 && c<size(dilated,2)
+%                                 if dilated(r,c,s) == 0
+%                                     dilated(r,c,s) =1;
+%                                 end
+%                                 %check whether the neighbour to the left should be added to the queue
+%                                 lr = r;
+%                                 lc = c-1;
+%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+%                                 
+%                                 %check whether the neighbour to the right should be added to the queue
+%                                 lc = c+1;
+%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+%                                 
+%                                 %check whether the neighbour to above should be added to the queue
+%                                 lr = r-1;
+%                                 lc = c;
+%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+%                                 
+%                                 %check whether the neighbour to below should be added to the queue
+%                                 lr = r+1;
+%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
+%                             end
+%                         end
+%                         keyboard
+                        dilated(:,:,s) = javaFlooded.dilated;
+                        clear javaFlood;
                    end
                end
            end

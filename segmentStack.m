@@ -18,7 +18,7 @@ function segmentedStack = segmentStack(lahde,constants)
     lbpCutPoints = 0:17;
     varCutPoints = 0:15;
     lbpBlockSize = 15; %Use lbpBlockSize+1 x lbpBlockSize+1 sample for lbp
-    for i = 10%1:length(info) %Go through the whole stack
+    for i = 1:length(info) %Go through the whole stack
        segmentedStack(i).info = info(jarjestys(i));
        data = double(dicomread(info(jarjestys(i))));
        data = conv2(data,constants.filter);
@@ -63,7 +63,7 @@ function segmentedStack = segmentStack(lahde,constants)
 %        end
         segmentedStack(i).vCloseness = javaSpeedUp.vCloseness;
         segmentedStack(i).lCloseness = javaSpeedUp.lCloseness;
-        figure,imshow(segmentedStack(i).lCloseness)
+%         figure,imshow(segmentedStack(i).lCloseness)
         segmentedStack(i).gCloseness = javaSpeedUp.gCloseness;
        segmentedStack(i).mask = javaSpeedUp.mask;
 %        keyboard;
