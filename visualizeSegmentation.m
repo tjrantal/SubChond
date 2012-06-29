@@ -21,9 +21,11 @@ for kh = 1%:10
         set(esa,'currentaxes',f(i));,i = i+1;
         imshow(mat2gray(data.segmented.segmentedStack(s).gCloseness));
         set(esa,'currentaxes',f(i));,i = i+1;
-        sumClose = data.segmented.segmentedStack(s).vCloseness+data.segmented.segmentedStack(s).lCloseness+data.segmented.segmentedStack(s).gCloseness;
-        sumClose(find(sumClose < 1.7)) = 0;
-        imshow(mat2gray(sumClose));
+        imshow(mat2gray(data.segmented.segmentedStack(s).mCloseness));
+%         set(esa,'currentaxes',f(i));,i = i+1;
+%         sumClose = data.segmented.segmentedStack(s).vCloseness+data.segmented.segmentedStack(s).lCloseness+data.segmented.segmentedStack(s).gCloseness;
+%         sumClose(find(sumClose < 1.7)) = 0;
+%         imshow(mat2gray(sumClose));
 %         %Laplacian
 %         set(esa,'currentaxes',f(i));,i = i+1;
 %         laplac = del2(data.segmented.segmentedStack(s).data);

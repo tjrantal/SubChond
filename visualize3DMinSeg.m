@@ -1,4 +1,4 @@
-function visualize3DsegmentationResult
+function visualize3DMinSeg
     clear all;
     close all;
     clc;
@@ -9,23 +9,21 @@ function visualize3DsegmentationResult
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
     for kh = 1%:10
-        data = load(['Segmented' num2str(kh) '.mat']);
+        data = load(['SegmentedMin' num2str(kh) '.mat']);
         
         %Original data
         data3d = zeros(size(data.segmented.segmentedStack(1).data,1),size(data.segmented.segmentedStack(1).data,2),length(data.segmented.segmentedStack));
-        data3v = zeros(size(data.segmented.segmentedStack(1).vCloseness,1),size(data.segmented.segmentedStack(1).vCloseness,2),length(data.segmented.segmentedStack));
-        data3l = zeros(size(data.segmented.segmentedStack(1).lCloseness,1),size(data.segmented.segmentedStack(1).lCloseness,2),length(data.segmented.segmentedStack));
-        data3g = zeros(size(data.segmented.segmentedStack(1).gCloseness,1),size(data.segmented.segmentedStack(1).gCloseness,2),length(data.segmented.segmentedStack));
         data3m = zeros(size(data.segmented.segmentedStack(1).mCloseness,1),size(data.segmented.segmentedStack(1).mCloseness,2),length(data.segmented.segmentedStack));
+        
         %Get 3D stack and fill voids
         for s = 1:length(data.segmented.segmentedStack)
-           data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
-           data3v(:,:,s) =  data.segmented.segmentedStack(s).vCloseness;
-           data3l(:,:,s) =  data.segmented.segmentedStack(s).lCloseness;
-           data3g(:,:,s) =  data.segmented.segmentedStack(s).gCloseness;
-           data3m(:,:,s) =  data.segmented.segmentedStack(s).mCloseness;
+           data3d(:,:,s) = data.segmented.segmentedStack(s).data;
+           data3m(:,:,s) = data.segmented.segmentedStack(s).mCloseness;
+           minData(:,:,s)  = minfilt2(data3d(:,:,s),5,'same');
+           imshow(minData(:,:,s),[]);
+           pause
         end
-%         keyboard;
+        keyboard;
         %Segmented data
         segment3d = zeros(size(data.segmented.segmentedStack(1).mask,1),size(data.segmented.segmentedStack(1).mask,2),length(data.segmented.segmentedStack));
         %Get 3D stack and fill voids
@@ -35,7 +33,9 @@ function visualize3DsegmentationResult
 %            imshow(segment3d(:,:,s),[]);
 %            pause
         end
+        
 %         keyboard;
+        
         for r = 1:size(segment3d,1)
             segment3d(r,:,:) =  imdilate(imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack)),nHoodStack);
         end
@@ -160,53 +160,5 @@ function visualize3DsegmentationResult
         delete(esa);
     end
 
-    function dilated = flood3d(segmentedVolume)
-       global meanGrayScale stdGrayScale;
-       meanGrayScale    = mean(data3m(find(segmentedVolume ==1)));
-       stdGrayScale     = 4*std(data3m(find(segmentedVolume ==1)));
-       dilated = segmentedVolume;
-       for s = 1:size(dilated,3)
-           init = find(dilated(:,:,s) ==1,1,'first');
-           if ~isempty(init)
-               tempSlice = squeeze(dilated(:,:,s));
-               tempSlice(:,1) = 0;
-               tempSlice(1,:) = 0;
-               tempSlice(size(tempSlice,1),:) = 0;
-               tempSlice(:,size(tempSlice,2)) = 0;
-               boundaries = bwboundaries(tempSlice,'noholes');
-               for b = 1:length(boundaries)
-                   for ii = 1:length(boundaries{b})
-                       r = boundaries{b}(ii,1);
-                       c = boundaries{b}(ii,2);
-                        javaFlooded = javaLoop.JavaDilate(squeeze(dilated(:,:,s)), squeeze(data3m(:,:,s)), r, c, [meanGrayScale-stdGrayScale meanGrayScale+stdGrayScale]);
-                        dilated(:,:,s) = javaFlooded.dilated;
-                        clear javaFlood;
-                   end
-               end
-           end
-        end
-    end
-    
-    %Dilate decision based on min filtered image
-    function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
-        global meanGrayScale stdGrayScale;
-         if dilated(lr,lc,s) == 0 && ...
-            data3m(lr,lc,s) > meanGrayScale-stdGrayScale && ...
-            data3m(lr,lc,s) < meanGrayScale+stdGrayScale
-            tempR = [tempR lr];
-            tempC = [tempC lc];
-        end
-    end
-
-%     %Closeness stuff  
-%     function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
-%          if dilated(lr,lc,s) == 0 && ( ...
-%                 (data3v(lr,lc,s) > 0.7 && data3l(lr,lc,s) > 0.7) ...
-%              || (data3v(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
-%              || (data3l(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
-%              )
-%             tempR = [tempR lr];
-%             tempC = [tempC lc];
-%         end
-%     end
+ 
 end

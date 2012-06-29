@@ -23,13 +23,11 @@ function segmentedStack = segmentStack(lahde,constants)
        data = double(dicomread(info(jarjestys(i))));
        data = conv2(data,constants.filter);
        segmentedStack(i).data = data;
-       wholeImageVarHist = cont(data,2,16,constants.binCutpoints);
-       wholeImageLBP = lbp(data,2,16,constants.lbpMapping,'matrix');
        minData  = minfilt2(data,5,'same');
        segmentedStack(i).minData = minData;
        disp('Into javaLoop');
-       javaSpeedUp = javaLoop.JavaLoop(wholeImageVarHist, wholeImageLBP,minData, data, varCutPoints, lbpCutPoints, constants.grayBinCutpoints, constants.min3DBinCutpoints, ...
-           lbpBlockSize, constants.varianceSumHistogram,constants.lbpSumHistogram,constants.graySumHistogram, constants.minSumHistogram,constants.threshold);
+       javaSpeedUp = javaLoop.JavaLoopMin(data,minData, constants.min3DBinCutpoints, ...
+           lbpBlockSize, constants.minSumHistogram,0.2);
 %        r = 1;
 %        c = 1;
 %         dblock = reshape(wholeImageVarHist(r:r+lbpBlockSize,c:c+lbpBlockSize),1,(lbpBlockSize+1)^2);
@@ -63,21 +61,17 @@ function segmentedStack = segmentStack(lahde,constants)
 %            end
 %            disp(['Row ' num2str(r) '/' num2str(size(data,1)-lbpBlockSize) ' in file ' num2str(i)]);
 %        end
-        segmentedStack(i).vCloseness = javaSpeedUp.vCloseness;
-        segmentedStack(i).lCloseness = javaSpeedUp.lCloseness;
         segmentedStack(i).mCloseness = javaSpeedUp.mCloseness;
-%         figure,imshow(segmentedStack(i).lCloseness)
-        segmentedStack(i).gCloseness = javaSpeedUp.gCloseness;
        segmentedStack(i).mask = javaSpeedUp.mask;
 %        keyboard;
        clear javaSpeedUp;
        disp(['segmented file ' num2str(i)]);
     end
     
-    function closeness = checkClose(sampleHist,modelHist)
-        closeness = 0;
-        for h = 1:length(sampleHist)
-            closeness = closeness + min([sampleHist(h) modelHist(h)]);
-        end
-    end
+%     function closeness = checkClose(sampleHist,modelHist)
+%         closeness = 0;
+%         for h = 1:length(sampleHist)
+%             closeness = closeness + min([sampleHist(h) modelHist(h)]);
+%         end
+%     end
 end

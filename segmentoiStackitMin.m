@@ -16,7 +16,6 @@ constants.varianceSumHistogram = [0.0625036453776611,0.0625036453776611,0.062496
 constants.graySumHistogram = [0.000480177296232455,0.000147746860379217,0.000160059098744152,0.000437084461955183,0.00128047278995321,0.00589756217680374,0.0233624722974637,0.0717865057867520,0.125640236394977,0.165488795863088,0.188247968480670,0.180072642206353,0.135680866781581,0.0679881802511697,0.0259911351883772,0.00733809406550111,0;];
 constants.min3DBinCutpoints = [-Inf,769.257286526609,803.350720607429,826.527964293588,846.941552155667,866.880889655944,884.930208419108,900.838664590984,916.491258796024,932.593509676166,949.486375913169,967.054195585596,985.951475172491,1005.73814287238,1027.80999185755,1060.07735865210,Inf;];
 constants.minSumHistogram = [0.0624353607485841,0.0624907658212263,0.0625215464171386,0.0624722974636789,0.0625707953705984,0.0624661413444964,0.0625092341787737,0.0625338586555036,0.0624538291061315,0.0625092341787737,0.0625338586555036,0.0624415168677666,0.0625338586555036,0.0624415168677666,0.0625769514897809,0.0625092341787737,0;];
-constants.threshold = 2.1;
 hakemistot = dir(lahde);
 samples = struct();
 for i = 3%:length(hakemistot)
@@ -29,8 +28,8 @@ for i = 3%:length(hakemistot)
         %Voisi myös kokeilla ympyräblokkeja?
 %     data = createTextureSamples([lahde hakemistot(i).name]);
     segmented = struct();
-    segmented.segmentedStack = segmentStack([lahde hakemistot(i).name],constants);
-    save(['Segmented' num2str(i-2) '.mat'],'segmented'); %Save the results as we go in order to not lose all of the data done...
+    segmented.segmentedStack = segmentStackMin([lahde hakemistot(i).name],constants);
+    save(['SegmentedMin' num2str(i-2) '.mat'],'segmented'); %Save the results as we go in order to not lose all of the data done...
     disp(['Segmented ' num2str(i-2) ' of ' num2str(length(hakemistot)-2)]);
 %     keyboard;
 end
