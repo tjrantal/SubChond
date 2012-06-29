@@ -4,7 +4,9 @@ function visualizeSlices
     close all;
     clc;
    addpath('max_min_filter');
-
+    filter = fspecial('gaussian');
+    
+    
     for kh = 1%:10
         data = load(['Segmented' num2str(kh) '.mat']);
         
@@ -15,14 +17,25 @@ function visualizeSlices
         %Get 3D stack and fill voids
         for s = 1:length(data.segmented.segmentedStack)
            data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
+           
            minCoronal(:,:,s) = minfilt2(data3d(:,:,s),5,'same');
+%            minCoronal(:,:,s) = timoMinfilt(data3d(:,:,s),[5 3 3]);
         end
+        
+        
+%         minCoronal = timoMinFilt(data3d,[5 5 3]);
         for c = 1:size(minSagittal,2)
             minSagittal(:,c,:) = minfilt2(squeeze(data3d(:,c,:)),3,'same');
         end
         for r = 1:size(minAxial,1)
             minAxial(r,:,:) = minfilt2(squeeze(data3d(r,:,:)),3,'same');
         end
+        
+        minSagittal(find(minSagittal < 500)) = 0;
+        minSagittal(find(minSagittal > 1200)) = 0;
+        minAxial(find(minAxial < 500)) = 0;
+        minAxial(find(minAxial > 1200)) = 0;
+        
         esa = figure;
 
         for i = 1:3
@@ -74,6 +87,27 @@ function visualizeSlices
 
         
     end
+    
+    function filtered = timoMinFilt(dataIn,geometry)
+        for d = 1:size(dataIn,3)
+            for c = 1:size(dataIn,2)
+                for r = 1:size(dataIn,1)
+                    rLimits = checkLimits(r,size(dataIn,1),geometry(1));
+                    cLimits = checkLimits(c,size(dataIn,2),geometry(2));
+                    dLimits = checkLimits(d,size(dataIn,3),geometry(3));
+                    filtered(r,c,d) = min(min(min(dataIn(rLimits,cLimits,dLimits))));
+                end
+            end
+        end
+        
+    end
+    function indices =  checkLimits(valIn,maxIn,width)
+        diff = floor(width/2);
+        indices = (valIn-diff):(valIn+diff);
+        indices = indices(find(indices >= 1));
+        indices = indices(find(indices <= maxIn));
+    end
+
         function setFig(obj,evt)
     %          global data;
              sliceToShow = floor(get(obj,'Value'));

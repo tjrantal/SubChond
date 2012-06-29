@@ -15,3 +15,5 @@ TODO NEXT
 Try segmenting the images in other planes than what they were originally measured in. The in plane voxel size differs from out of plane voxel size by a factor of 10. Visual inspection seems to suggest that the chance of success might be better in other directions.
 
 Perhaps 3x3x3 volumetric sample -> mean/stdev as measures
+
+Calculate 3x3x3 sample means from stacks filtered with 3D min filter!! Continue work from visualizeSlicePlanesMinFilter! 3D filter didn't actually work...
