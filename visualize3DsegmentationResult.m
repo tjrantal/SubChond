@@ -176,39 +176,7 @@ function visualize3DsegmentationResult
                    for ii = 1:length(boundaries{b})
                        r = boundaries{b}(ii,1);
                        c = boundaries{b}(ii,2);
-    %                    [r,c] = ind2sub(size(dilated),init(ii));
-                       javaFlooded = javaLoop.JavaDilate(squeeze(dilated(:,:,s)), squeeze(data3m(:,:,s)), r, c, [meanGrayScale-stdGrayScale meanGrayScale+stdGrayScale]);
-%                        tempR = r;
-%                        tempC = c;
-%                         while length(tempR) > 0
-%                             r = tempR(length(tempR));
-%                             c = tempC(length(tempC));
-%                             tempR(length(tempR)) = [];
-%                             tempC(length(tempC)) = [];
-%                             if r>1 && r<size(dilated,1) && c>1 && c<size(dilated,2)
-%                                 if dilated(r,c,s) == 0
-%                                     dilated(r,c,s) =1;
-%                                 end
-%                                 %check whether the neighbour to the left should be added to the queue
-%                                 lr = r;
-%                                 lc = c-1;
-%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-%                                 
-%                                 %check whether the neighbour to the right should be added to the queue
-%                                 lc = c+1;
-%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-%                                 
-%                                 %check whether the neighbour to above should be added to the queue
-%                                 lr = r-1;
-%                                 lc = c;
-%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-%                                 
-%                                 %check whether the neighbour to below should be added to the queue
-%                                 lr = r+1;
-%                                 [tempR,tempC] = checkScale(dilated,lr,lc,s,tempR,tempC);
-%                             end
-%                         end
-%                         keyboard
+                        javaFlooded = javaLoop.JavaDilate(squeeze(dilated(:,:,s)), squeeze(data3m(:,:,s)), r, c, [meanGrayScale-stdGrayScale meanGrayScale+stdGrayScale]);
                         dilated(:,:,s) = javaFlooded.dilated;
                         clear javaFlood;
                    end
