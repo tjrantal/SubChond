@@ -2,12 +2,12 @@ function visualize3DsegmentationResult
     clear all;
     close all;
     clc;
-   
-    global segmentedVolume data3d data3v data3l data3g notDone imageHandle subHandle constants;
+    addpath('max_min_filter');
+    global segmentedVolume data3d data3v data3l data3g data3m notDone imageHandle subHandle constants;
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
-    for kh = 1%:10
+    for kh = 2%:10
         data = load(['Segmented' num2str(kh) '.mat']);
         
         %Original data
@@ -15,12 +15,15 @@ function visualize3DsegmentationResult
         data3v = zeros(size(data.segmented.segmentedStack(1).vCloseness,1),size(data.segmented.segmentedStack(1).vCloseness,2),length(data.segmented.segmentedStack));
         data3l = zeros(size(data.segmented.segmentedStack(1).lCloseness,1),size(data.segmented.segmentedStack(1).lCloseness,2),length(data.segmented.segmentedStack));
         data3g = zeros(size(data.segmented.segmentedStack(1).gCloseness,1),size(data.segmented.segmentedStack(1).gCloseness,2),length(data.segmented.segmentedStack));
+        data3m = zeros(size(data.segmented.segmentedStack(1).data,1),size(data.segmented.segmentedStack(1).data,2),length(data.segmented.segmentedStack));
         %Get 3D stack and fill voids
         for s = 1:length(data.segmented.segmentedStack)
            data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
            data3v(:,:,s) =  data.segmented.segmentedStack(s).vCloseness;
            data3l(:,:,s) =  data.segmented.segmentedStack(s).lCloseness;
-           data3g(:,:,s) =  data.segmented.segmentedStack(s).gCloseness;           
+           data3g(:,:,s) =  data.segmented.segmentedStack(s).gCloseness;
+           data3m(:,:,s) = minfilt2(data3d(:,:,s),4,'same');
+           data3m(:,:,s) = data3m(:,:,s)/max(max(data3m(:,:,s)));
         end
         
         %Segmented data
@@ -134,7 +137,10 @@ function visualize3DsegmentationResult
          toPlot3 = squeeze(data3g(:,:,sliceToShow));
          toPlot3(find(toPlot3 < 0.7)) = 0;
          toPlot(find(toPlot < 0.7)) = 0;
-         set(imageHandle(i),'CData',mat2gray(toPlot+toPlot2+toPlot3));
+         minPlot = minfilt2(squeeze(data3d(:,:,sliceToShow)),5);
+         minPlot = minPlot/max(max(minPlot));
+         set(imageHandle(i),'CData',mat2gray(minPlot));
+         %set(imageHandle(i),'CData',mat2gray(toPlot+toPlot2+toPlot3));
          title(['Fig l' num2str(sliceToShow)]);
          i=i+1;
          
@@ -204,7 +210,8 @@ function visualize3DsegmentationResult
            end
         end
     end
-
+    
+    %Dilate decision based on min filtered image
     function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
          if dilated(lr,lc,s) == 0 && ( ...
                 (data3v(lr,lc,s) > 0.7 && data3l(lr,lc,s) > 0.7) ...
@@ -215,4 +222,16 @@ function visualize3DsegmentationResult
             tempC = [tempC lc];
         end
     end
+
+%     %Closeness stuff  
+%     function [tempR tempC] = checkScale(dilated,lr,lc,s,tempR,tempC)
+%          if dilated(lr,lc,s) == 0 && ( ...
+%                 (data3v(lr,lc,s) > 0.7 && data3l(lr,lc,s) > 0.7) ...
+%              || (data3v(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
+%              || (data3l(lr,lc,s) > 0.7 && data3g(lr,lc,s) > 0.7) ...
+%              )
+%             tempR = [tempR lr];
+%             tempC = [tempC lc];
+%         end
+%     end
 end
