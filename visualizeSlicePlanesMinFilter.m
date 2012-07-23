@@ -28,13 +28,14 @@ function visualizeSlices
             minSagittal(:,c,:) = minfilt2(squeeze(data3d(:,c,:)),3,'same');
         end
         for r = 1:size(minAxial,1)
-            minAxial(r,:,:) = minfilt2(squeeze(data3d(r,:,:)),3,'same');
+%             minAxial(r,:,:) = minfilt2(squeeze(data3d(r,:,:)),3,'same');
+            minAxial(r,:,:) = squeeze(data3d(r,:,:));
         end
         
-        minSagittal(find(minSagittal < 500)) = 0;
-        minSagittal(find(minSagittal > 1200)) = 0;
-        minAxial(find(minAxial < 500)) = 0;
-        minAxial(find(minAxial > 1200)) = 0;
+%         minSagittal(find(minSagittal < 500)) = 0;
+%         minSagittal(find(minSagittal > 1200)) = 0;
+%         minAxial(find(minAxial < 500)) = 0;
+%         minAxial(find(minAxial > 1200)) = 0;
         
         esa = figure;
 

@@ -15,17 +15,15 @@ public class JavaLoop{
 	public double[][] vCloseness;
 	public double[][] lCloseness;
 	public double[][] gCloseness;
-	public double[][] mCloseness;
 	public double[][] mask;
 	//public double[][][] histograms;
 	//public double[] histo;
 	
-	public JavaLoop(double[][] wholeImageVarHist, double[][] wholeImageLBP, double[][] minData, double[][] data, double[] varCutPoints, double[] lbpCutPoints, double[] grayBinCutpoints, double[] minCutPoints, int lbpBlockSize, double[] varianceSumHistogram,double[] lbpSumHistogram,double[] graySumHistogram, double[] minSumHistogram,double thresh){
+	public JavaLoop(double[][] wholeImageVarHist, double[][] wholeImageLBP, double[][] data, double[] varCutPoints, double[] lbpCutPoints, double[] grayBinCutpoints, int lbpBlockSize, double[] varianceSumHistogram,double[] lbpSumHistogram,double[] graySumHistogram){
 		//System.out.println("data 1 1 "+data[1][1]+" data 1 2 "+data[1][2]+" data 2 1 "+data[2][1]);
 		vCloseness = new double[wholeImageVarHist.length-lbpBlockSize][wholeImageVarHist[0].length-lbpBlockSize];
 		lCloseness = new double[wholeImageVarHist.length-lbpBlockSize][wholeImageVarHist[0].length-lbpBlockSize];
 		gCloseness = new double[wholeImageVarHist.length-lbpBlockSize][wholeImageVarHist[0].length-lbpBlockSize];
-		mCloseness = new double[minData.length-lbpBlockSize][minData[0].length-lbpBlockSize];
 		mask = new double[wholeImageVarHist.length-lbpBlockSize][wholeImageVarHist[0].length-lbpBlockSize];
 		//histograms = new double[wholeImageVarHist.length-lbpBlockSize][wholeImageVarHist[0].length-lbpBlockSize][];
 		/*
@@ -47,14 +45,12 @@ public class JavaLoop{
                 lbpHist = arrDiv(lbpHist,sum(lbpHist));
                 grayHist = arrDiv(grayHist,sum(grayHist));
 				
-				double[] minHist = histc(reshape(minData,r,r+lbpBlockSize,c,c+lbpBlockSize),minCutPoints);
-				minHist = arrDiv(minHist,sum(minHist));
-				mCloseness[r][c] = checkClose(minHist,minSumHistogram);
+				
 				
                 vCloseness[r][c] = checkClose(varHist,varianceSumHistogram);
                 lCloseness[r][c] = checkClose(lbpHist,lbpSumHistogram);
                 gCloseness[r][c] = checkClose(grayHist,graySumHistogram);
-                if (lCloseness[r][c]>0.6 && mCloseness[r][c] > 0.4 && gCloseness[r][c] >0.4){
+                if (vCloseness[r][c]+lCloseness[r][c]+gCloseness[r][c] > 1.9){
 					mask[r][c]=1;
                 }else{
 					mask[r][c]=0;

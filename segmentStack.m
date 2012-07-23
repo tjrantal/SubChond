@@ -25,11 +25,9 @@ function segmentedStack = segmentStack(lahde,constants)
        segmentedStack(i).data = data;
        wholeImageVarHist = cont(data,2,16,constants.binCutpoints);
        wholeImageLBP = lbp(data,2,16,constants.lbpMapping,'matrix');
-       minData  = minfilt2(data,5,'same');
-       segmentedStack(i).minData = minData;
        disp('Into javaLoop');
-       javaSpeedUp = javaLoop.JavaLoop(wholeImageVarHist, wholeImageLBP,minData, data, varCutPoints, lbpCutPoints, constants.grayBinCutpoints, constants.min3DBinCutpoints, ...
-           lbpBlockSize, constants.varianceSumHistogram,constants.lbpSumHistogram,constants.graySumHistogram, constants.minSumHistogram,constants.threshold);
+       javaSpeedUp = javaLoop.JavaLoop(wholeImageVarHist, wholeImageLBP, data, varCutPoints, lbpCutPoints, constants.grayBinCutpoints, ...
+           lbpBlockSize, constants.varianceSumHistogram,constants.lbpSumHistogram,constants.graySumHistogram);
 %        r = 1;
 %        c = 1;
 %         dblock = reshape(wholeImageVarHist(r:r+lbpBlockSize,c:c+lbpBlockSize),1,(lbpBlockSize+1)^2);
@@ -65,8 +63,7 @@ function segmentedStack = segmentStack(lahde,constants)
 %        end
         segmentedStack(i).vCloseness = javaSpeedUp.vCloseness;
         segmentedStack(i).lCloseness = javaSpeedUp.lCloseness;
-        segmentedStack(i).mCloseness = javaSpeedUp.mCloseness;
-%         figure,imshow(segmentedStack(i).lCloseness)
+        figure,imshow(segmentedStack(i).lCloseness)
         segmentedStack(i).gCloseness = javaSpeedUp.gCloseness;
        segmentedStack(i).mask = javaSpeedUp.mask;
 %        keyboard;
