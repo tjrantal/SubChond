@@ -7,13 +7,13 @@ N.B. it is rather questionable whether subchondral bone pixel intensities may gi
 
 Currently trying to automate segmenting trabecular bone from the images. Working on using LBP textural analysis as outlined in (http://www.ee.oulu.fi/research/mvmp/mvg/files/pdf/pdf_6.pdf). Added just regular histogram to the measures, as the image indices are normalized b the MRI device and similar tissue produce similar pixel values in different subjects.
 
-Tried flood filling. Didn't work.
+Segmentation attempts:
 
-Tried min filter to enhance borders. Might work..
+Tried LBP analysis with 16x16 samples. Worked to a rough estimate (with proper parameters and boundary conditions, e.g. the largest volume, which has the centre of volume low enough in the image). Tried flood filling to refine the segmentation. Didn't work, as I couldn't come up with proper and robust conditions for expanding the volume of interest.
+
+Tried min filter to enhance borders, didn't work...
+
+Tried 3x3x3 volumetric min filter, didn't work...
 
 TODO NEXT
 Try segmenting the images in other planes than what they were originally measured in. The in plane voxel size differs from out of plane voxel size by a factor of 10. Visual inspection seems to suggest that the chance of success might be better in other directions.
-
-Perhaps 3x3x3 volumetric sample -> mean/stdev as measures
-
-Calculate 3x3x3 sample means from stacks filtered with 3D min filter!! Continue work from visualizeSlicePlanesMinFilter! 3D filter didn't actually work...
