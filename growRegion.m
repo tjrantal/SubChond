@@ -66,7 +66,6 @@ function grown = growRegion(dataSlice,segmentationMask,maxDiff)
     %remove it from queue. Note that relevant matrices are
     %%defined in the parent function, so no need to put in matrices as parameters
     function [nextPixel pixelQueue] = pollQueue(pixelQueue)
-        disp(['pQue length ' num2str(length(pixelQueue))]);
         if length(pixelQueue) > 0
            [val ind] = sort([pixelQueue.cost]);
            nextPixel = pixelQueue(ind(1));
