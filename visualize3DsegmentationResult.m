@@ -75,6 +75,22 @@ function visualize3DsegmentationResult
         initC = floor((size(data3d,2)-size(segmentedVolume,2))/2)+1;
         %Remove edges from original data to match the segmented data...
         data3d = data3d(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
+        
+        %Region grow in axial plane
+        for i = 1:size(segmentedVolume(r,:,:),1)
+            disp(['growing ' num2str(i)]);
+            if max(max(squeeze(segmentedVolume(r,:,:)))) > 0
+                figure
+                subplot(1,2,1);
+                imshow(segmentedVolume(r,:,:),[]);
+                segmentedVolume(r,:,:) = growRegion(squeeze(data3d(r,:,:)),squeeze(segmentedVolume(r,:,:)));
+                subplot(1,2,2);
+                imshow(segmentedVolume(r,:,:),[]);
+                keyboard;
+            end
+            
+        end
+        
 %         data3m = data3m(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
 %         data3m = data3m/max(max(max(data3m)));
          %3D dilate
