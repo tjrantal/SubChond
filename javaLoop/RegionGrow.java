@@ -44,6 +44,7 @@ public class RegionGrow{
 		columnCount = dataSlice[0].length;
 		visited = new byte[rowCount][columnCount];
 		currentMean = getCurrentMean();
+		
 		/*Init pixelQueue*/
 		int[][] seedIndices = find(segmentationMask);
 		for (int i = 0; i<seedIndices.length; ++i){
@@ -51,6 +52,47 @@ public class RegionGrow{
 			pixelQueue.add(new NextPixel(Math.abs(dataSlice[seedIndices[i][0]][seedIndices[i][1]]-currentMean),coordinates));
 		}
 		
+		/*Grow Region*/
+		NextPixel nextPixel;
+		int[] coordinates;
+		while (pixelQueue.size() > 0){ //Go through all cells in queue
+			nextPixel  = pixelQueue.poll();	/*Get the pixel with the lowest cost and remove it from the queue*/
+			/*	Add 4-connected neighbourhood to the  queue, unless the
+			neighbourhood pixels have already been visited or are part of the
+			mask already		*/
+			if (nextPixel.cost <= maxDiff){    //If cost is still less than maxDiff
+				coordinates = nextPixel.coordinates;
+				visited[coordinates[0]][coordinates[1]] = (byte) 1;
+				segmentationMask[coordinates[0]][coordinates[1]] = 1;
+				currentMean = getCurrentMean();  //The mean may be updated to include the new pixel. Might work just as well without update with several seeds...
+				//Check 4-connected neighbour
+				int[][] neighbourhood = {
+								{coordinates[0]-1,	coordinates[1]},	/*Up one*/
+								{coordinates[0]+1,	coordinates[1]},	/*Down one*/
+								{coordinates[0],		coordinates[1]-1},	/*Left one*/
+								{coordinates[0],		coordinates[1]+1}	/*Right one*/
+								};
+				checkNeighbours(neighbourhood);
+			}else{ //First pixel with higher than maxDiff cost or run out of pixels
+				break;
+			}
+        
+		}
+		grown = (double[][]) segmentationMask.clone();
+		
+	}
+	
+	/*Update pixel queue*/
+	private void checkNeighbours(int[][] neighbourhood){
+		int[] coordinates;
+        for (int r = 0;r<neighbourhood.length;++r){
+			coordinates = neighbourhood[r];
+            if (coordinates[0] >= 0 && coordinates[0] < rowCount && coordinates[1] >=0 && coordinates[1] <= columnCount){ //If the neigbour is within the image...
+               if (visited[coordinates[0]][coordinates[1]] == (byte) 0 && segmentationMask[coordinates[0]][coordinates[1]] == 0){
+                  pixelQueue.add(new NextPixel(Math.abs(dataSlice[coordinates[0]][coordinates[1]]-currentMean),coordinates));
+               }
+            }
+        }
 	}
 	
 	private int[][] find(double[][] matrix){
