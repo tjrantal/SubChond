@@ -50,11 +50,11 @@ public class RegionGrow3D{
 	
 	private void growRegion(){
 		/*Init variables and add seed points to the queue*/
-		pixelQueue = new PriorityQueue<NextPixel>();
-		rowCount = dataSlice.length;
-		columnCount = dataSlice[0].length;
-		depthCount = = dataSlice[0][0].length;
-		visited = new byte[rowCount][columnCount][depthCount];
+		pixelQueue	= new PriorityQueue<NextPixel>();
+		rowCount	= dataSlice.length;
+		columnCount	= dataSlice[0].length;
+		depthCount	= dataSlice[0][0].length;
+		visited		= new byte[rowCount][columnCount][depthCount];
 		
 		currentMean = getCurrentMean();
 			
@@ -63,15 +63,15 @@ public class RegionGrow3D{
 		int[][] seedIndices = find(segmentationMask);
 
 		for (int i = 0; i<seedIndices.length; ++i){
-			int[] coordinates = {seedIndices[i][0],seedIndices[i][1]};
-			pixelQueue.add(new NextPixel(Math.abs(dataSlice[seedIndices[i][0]][seedIndices[i][1]]-currentMean),coordinates));
+			int[] coordinates = {seedIndices[i][0],seedIndices[i][1],seedIndices[i][2]};
+			pixelQueue.add(new NextPixel(Math.abs(dataSlice[seedIndices[i][0]][seedIndices[i][1]][seedIndices[i][2]]-currentMean),coordinates));
 		}
 		
 		/*Grow Region*/
 		NextPixel nextPixel;
 		System.out.println("Start Growing");
 		long maskArea = seedIndices.length;
-		int[][] neighbourhood = new int[4][2];
+		int[][] neighbourhood = new int[6][3];
 		int[] coordinates;
 		while (pixelQueue.size() > 0){ //Go through all cells in queue
 			nextPixel  = pixelQueue.poll();	/*Get the pixel with the lowest cost and remove it from the queue*/
@@ -81,11 +81,11 @@ public class RegionGrow3D{
 			if (nextPixel.cost <= maxDiff){    //If cost is still less than maxDiff
 				coordinates = nextPixel.coordinates;
 				//System.out.println("r "+coordinates[0]+" c "+coordinates[1]);
-				visited[coordinates[0]][coordinates[1]] = (byte) 1;
-				if (segmentationMask[coordinates[0]][coordinates[1]] < 1){
-					segmentationMask[coordinates[0]][coordinates[1]] = 1;
+				visited[coordinates[0]][coordinates[1]][coordinates[2]] = (byte) 1;
+				if (segmentationMask[coordinates[0]][coordinates[1]][coordinates[2]] < 1){
+					segmentationMask[coordinates[0]][coordinates[1]][coordinates[2]] = 1;
 					++maskArea;	//Add the new pixel to the area
-					currentMean += ((dataSlice[coordinates[0]][coordinates[1]]-currentMean)/((double) maskArea)); //Adding the weighted difference updates the mean...
+					currentMean += ((dataSlice[coordinates[0]][coordinates[1]][coordinates[2]]-currentMean)/((double) maskArea)); //Adding the weighted difference updates the mean...
 					//currentMean = getCurrentMean();  //The mean may be updated to include the new pixel. Might work just as well without update with several seeds...
 				}
 				
@@ -96,12 +96,22 @@ public class RegionGrow3D{
 				neighbourhood[1][0] = coordinates[0]+1;	/*Down one*/
 				neighbourhood[2][0] = coordinates[0];
 				neighbourhood[3][0] = coordinates[0];
+				neighbourhood[4][0] = coordinates[0];
+				neighbourhood[5][0] = coordinates[0];
 				
 				neighbourhood[0][1] = coordinates[1];
 				neighbourhood[1][1] = coordinates[1];
 				neighbourhood[2][1] = coordinates[1]-1;	/*Left one*/
 				neighbourhood[3][1] = coordinates[1]+1;	/*Right one*/
+				neighbourhood[4][1] = coordinates[1];
+				neighbourhood[5][1] = coordinates[1];
 
+				neighbourhood[0][2] = coordinates[2];	
+				neighbourhood[1][2] = coordinates[2];	
+				neighbourhood[2][2] = coordinates[2];
+				neighbourhood[3][2] = coordinates[2];
+				neighbourhood[4][2] = coordinates[2]-1;	/*Closer one*/
+				neighbourhood[5][2] = coordinates[2]+1;	/*Further one*/
 				//System.out.println("Qlength "+pixelQueue.size()+" mean "+currentMean+" alt Mean "+currentMean2+" area "+maskArea);
 				checkNeighbours(neighbourhood);
 			}else{ //First pixel with higher than maxDiff cost or run out of pixels
@@ -118,30 +128,35 @@ public class RegionGrow3D{
 		int[] coordinates;
         for (int r = 0;r<neighbourhood.length;++r){
 			coordinates = neighbourhood[r];
-            if (coordinates[0] >= 0 && coordinates[0] < rowCount && coordinates[1] >=0 && coordinates[1] < columnCount){ //If the neigbour is within the image...
-               if (visited[coordinates[0]][coordinates[1]] == (byte) 0 && segmentationMask[coordinates[0]][coordinates[1]] == 0){
-					int[] queCoordinates = {coordinates[0],coordinates[1]};
-                  pixelQueue.add(new NextPixel(Math.abs(dataSlice[coordinates[0]][coordinates[1]]-currentMean),queCoordinates));
+            if (coordinates[0] >= 0 && coordinates[0] < rowCount && 
+				coordinates[1] >=0 && coordinates[1] < columnCount &&
+				coordinates[2] >=0 && coordinates[2] < depthCount){ //If the neigbour is within the image...
+               if (visited[coordinates[0]][coordinates[1]][coordinates[2]] == (byte) 0 && segmentationMask[coordinates[0]][coordinates[1]][coordinates[2]] == 0){
+					int[] queCoordinates = {coordinates[0],coordinates[1],coordinates[2]};
+                  pixelQueue.add(new NextPixel(Math.abs(dataSlice[coordinates[0]][coordinates[1]][coordinates[2]]-currentMean),queCoordinates));
                }
             }
         }
 	}
 	
-	private int[][] find(double[][] matrix){
-		int[][] temp = new int[matrix.length*matrix[0].length][2];
+	private int[][] find(double[][][] matrix){
+		int[][] temp = new int[matrix.length*matrix[0].length][3];
 		int found = 0;
 		for (int i = 0; i< matrix.length;++i){
 			for (int j = 0; j< matrix[i].length;++j){
-				if (matrix[i][j] > 0.5){
-					temp[found][0] = i;
-					temp[found][1] = j;
-					++found;					
+				for (int k = 0; k< matrix[i][j].length;++k){
+					if (matrix[i][j][k] > 0.5){
+						temp[found][0] = i;
+						temp[found][1] = j;
+						temp[found][2] = k;
+						++found;					
+					}
 				}
 			}
 		}
-		int[][] indices = new int[found][2];
+		int[][] indices = new int[found][3];
 		for (int i = 0; i<found; ++i){
-			for (int j = 0; j< 2; ++j){
+			for (int j = 0; j< 3; ++j){
 				indices[i][j] = temp[i][j];
 			}
 		}
@@ -152,7 +167,7 @@ public class RegionGrow3D{
 		int[][] indices = find(segmentationMask);
 		double sum = 0;
 		for (int i = 0; i<indices.length; ++i){
-			sum+= dataSlice[indices[i][0]][indices[i][1]];
+			sum+= dataSlice[indices[i][0]][indices[i][1]][indices[i][2]];
 		}
 		sum/=((double) indices.length);
 		return sum;
