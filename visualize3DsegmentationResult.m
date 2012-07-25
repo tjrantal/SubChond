@@ -8,7 +8,7 @@ function visualize3DsegmentationResult
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
-    for kh = 2:10
+    for kh = 4:10
         data = load(['Segmented' num2str(kh) '.mat']);
         
         %Original data
@@ -90,7 +90,8 @@ function visualize3DsegmentationResult
                 set(gcf,'currentaxes',temp(1));
                 set(plots(1),'cdata',squeeze(segmentedVolume(:,:,r)));
                 javaGrow = javaLoop.RegionGrow(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)),300);
-                segmentedVolume(:,:,r) = javaGrow.grown;
+                segmentedVolume(:,:,r) = javaGrow.segmentationMask;
+                clear javaGrow; %Try to free the memory...
                 %segmentedVolume(:,:,r) = growRegion(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
                 set(gcf,'currentaxes',temp(2));
                 set(plots(2),'cdata',squeeze(segmentedVolume(:,:,r)));

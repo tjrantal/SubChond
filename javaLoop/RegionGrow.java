@@ -8,11 +8,10 @@ import java.util.PriorityQueue;
 
 public class RegionGrow{
 	
-	public double[][]	grown;	//Grown region mask
 	
 	/*Parameters*/
 	private double[][] dataSlice;
-	private double[][] segmentationMask;
+	public double[][] segmentationMask;
 	private double maxDiff;
 	
 	/*Global variables, saves effort in declaring functions...*/
@@ -92,7 +91,6 @@ public class RegionGrow{
 			}
         
 		}
-		grown = (double[][]) segmentationMask.clone();
 		
 	}
 	
@@ -195,9 +193,9 @@ public class RegionGrow{
 		rg.printGrown();
 	}
 	public void printGrown(){
-		for (int r = 0; r<grown.length;++r){
-			for (int c = 0; c<grown[r].length;++c){
-				System.out.print((int) grown[r][c]+"\t");
+		for (int r = 0; r<segmentationMask.length;++r){
+			for (int c = 0; c<segmentationMask[r].length;++c){
+				System.out.print((int) segmentationMask[r][c]+"\t");
 			}
 			System.out.print("\n");
 		}
