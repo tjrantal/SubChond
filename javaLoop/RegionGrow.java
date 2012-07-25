@@ -44,11 +44,13 @@ public class RegionGrow{
 		rowCount = dataSlice.length;
 		columnCount = dataSlice[0].length;
 		visited = new byte[rowCount][columnCount];
-		currentMean = getCurrentMean();
 		
+		currentMean = getCurrentMean();
+			
 		System.out.println("Start Init");
 		/*Init pixelQueue*/
 		int[][] seedIndices = find(segmentationMask);
+
 		for (int i = 0; i<seedIndices.length; ++i){
 			int[] coordinates = {seedIndices[i][0],seedIndices[i][1]};
 			pixelQueue.add(new NextPixel(Math.abs(dataSlice[seedIndices[i][0]][seedIndices[i][1]]-currentMean),coordinates));
@@ -56,9 +58,10 @@ public class RegionGrow{
 		
 		/*Grow Region*/
 		NextPixel nextPixel;
-		int[] coordinates;
 		System.out.println("Start Growing");
 		long maskArea = seedIndices.length;
+		int[][] neighbourhood = new int[4][2];
+		int[] coordinates;
 		while (pixelQueue.size() > 0){ //Go through all cells in queue
 			nextPixel  = pixelQueue.poll();	/*Get the pixel with the lowest cost and remove it from the queue*/
 			/*	Add 4-connected neighbourhood to the  queue, unless the
@@ -66,6 +69,7 @@ public class RegionGrow{
 			mask already		*/
 			if (nextPixel.cost <= maxDiff){    //If cost is still less than maxDiff
 				coordinates = nextPixel.coordinates;
+				System.out.println("r "+coordinates[0]+" c "+coordinates[1]);
 				visited[coordinates[0]][coordinates[1]] = (byte) 1;
 				if (segmentationMask[coordinates[0]][coordinates[1]] < 1){
 					segmentationMask[coordinates[0]][coordinates[1]] = 1;
@@ -77,12 +81,16 @@ public class RegionGrow{
 				
 				
 				//Check 4-connected neighbour
-				int[][] neighbourhood = {
-								{coordinates[0]-1,	coordinates[1]},	/*Up one*/
-								{coordinates[0]+1,	coordinates[1]},	/*Down one*/
-								{coordinates[0],		coordinates[1]-1},	/*Left one*/
-								{coordinates[0],		coordinates[1]+1}	/*Right one*/
-								};
+				neighbourhood[0][0] = coordinates[0]-1;	/*Up one*/
+				neighbourhood[1][0] = coordinates[0]+1;	/*Down one*/
+				neighbourhood[2][0] = coordinates[0];
+				neighbourhood[3][0] = coordinates[0];
+				
+				neighbourhood[0][1] = coordinates[1];
+				neighbourhood[1][1] = coordinates[1];
+				neighbourhood[2][1] = coordinates[1]-1;	/*Left one*/
+				neighbourhood[3][1] = coordinates[1]+1;	/*Right one*/
+
 				//System.out.println("Qlength "+pixelQueue.size()+" mean "+currentMean+" alt Mean "+currentMean2+" area "+maskArea);
 				checkNeighbours(neighbourhood);
 			}else{ //First pixel with higher than maxDiff cost or run out of pixels
@@ -101,7 +109,8 @@ public class RegionGrow{
 			coordinates = neighbourhood[r];
             if (coordinates[0] >= 0 && coordinates[0] < rowCount && coordinates[1] >=0 && coordinates[1] < columnCount){ //If the neigbour is within the image...
                if (visited[coordinates[0]][coordinates[1]] == (byte) 0 && segmentationMask[coordinates[0]][coordinates[1]] == 0){
-                  pixelQueue.add(new NextPixel(Math.abs(dataSlice[coordinates[0]][coordinates[1]]-currentMean),coordinates));
+					int[] queCoordinates = {coordinates[0],coordinates[1]};
+                  pixelQueue.add(new NextPixel(Math.abs(dataSlice[coordinates[0]][coordinates[1]]-currentMean),queCoordinates));
                }
             }
         }
