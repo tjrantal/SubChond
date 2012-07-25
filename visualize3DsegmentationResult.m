@@ -8,7 +8,7 @@ function visualize3DsegmentationResult
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
-    for kh = 4:10
+    for kh = 1:10   %5 does not work...
         data = load(['Segmented' num2str(kh) '.mat']);
         
         %Original data
@@ -20,6 +20,7 @@ function visualize3DsegmentationResult
         %Get 3D stack and fill voids
         for s = 1:length(data.segmented.segmentedStack)
            data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
+%            data3d(:,:,s) =  minfilt2(data.segmented.segmentedStack(s).data,5,'same');
            data3v(:,:,s) =  data.segmented.segmentedStack(s).vCloseness;
            data3l(:,:,s) =  data.segmented.segmentedStack(s).lCloseness;
            data3g(:,:,s) =  data.segmented.segmentedStack(s).gCloseness;
@@ -126,15 +127,15 @@ function visualize3DsegmentationResult
 %         data3m = data3m(initR:(initR+size(segmentedVolume,1)-1),initC:(initC+size(segmentedVolume,2)-1),:);
 %         data3m = data3m/max(max(max(data3m)));
          %3D dilate
-%           keyboard;
+          
 %          disp('Starting flooding');
 %         segmentedVolume  = flood3d(segmentedVolume);
 %         disp('Flooded');
         data3d = data3d/(2*max(max(max(data3d))));
         data3d(find(segmentedVolume ==1)) = data3d(find(segmentedVolume ==1))+0.1;
         esa = figure;
-        for i = 1%:2
-           subHandle(i) = subplot(1,1,i); 
+        for i = 1:4
+           subHandle(i) = subplot(2,2,i); 
         end
         sliceToShow = 1;
         i = 1;
@@ -143,10 +144,20 @@ function visualize3DsegmentationResult
          title(['Fig ' num2str(sliceToShow)]);
          i=i+1;
 
-%         set(esa,'currentaxes',subHandle(i));
-%         imageHandle(i) = imshow(squeeze(data3v(:,:,sliceToShow)),[]);
-%          title(['Fig v' num2str(sliceToShow)]);
-%          i=i+1;
+        set(esa,'currentaxes',subHandle(i));
+        imageHandle(i) = imshow(squeeze(data3v(:,:,sliceToShow)),[]);
+         title(['Fig v ' num2str(sliceToShow)]);
+         i=i+1;
+         
+         set(esa,'currentaxes',subHandle(i));
+        imageHandle(i) = imshow(squeeze(data3l(:,:,sliceToShow)),[]);
+         title(['Fig l ' num2str(sliceToShow)]);
+         i=i+1;
+         
+                  set(esa,'currentaxes',subHandle(i));
+        imageHandle(i) = imshow(squeeze(data3g(:,:,sliceToShow)),[]);
+         title(['Fig g ' num2str(sliceToShow)]);
+         i=i+1;
 
 %                  set(esa,'currentaxes',subHandle(i));
 %         imageHandle(i) = imshow(squeeze(data3m(:,:,sliceToShow)),[]);
@@ -159,7 +170,7 @@ function visualize3DsegmentationResult
 %          i=i+1;
          
          notDone = 1;
-        set(esa,'position',[10 10 800 800],'visible','on','CloseRequestFcn',@doneWithTheStack);    %Wait for the work to be done
+        set(esa,'position',[10 10 1600 900],'visible','on','CloseRequestFcn',@doneWithTheStack);    %Wait for the work to be done
         slaideri = uicontrol(esa,'style','slider','min',1,'max', length(data.segmented.segmentedStack)+0.99, ...
         'value',1,'callback',@setFig, ...
         'units','normalized','position',[0.2,0.05,0.6,0.05],'sliderstep',[1/(length(data.segmented.segmentedStack)-1) 1/(length(data.segmented.segmentedStack)-1)]);
@@ -179,27 +190,20 @@ function visualize3DsegmentationResult
          title(['Fig ' num2str(sliceToShow)]);
          i=i+1;
 
-%         set(esa,'currentaxes',subHandle(i));
-%         set(imageHandle(i),'CData',squeeze(data3v(:,:,sliceToShow)));
-%          title(['Fig v' num2str(sliceToShow)]);
-%          i=i+1;
-
-%          set(esa,'currentaxes',subHandle(i));
-% %          toPlot = squeeze(data3l(:,:,sliceToShow));
-% %          toPlot2 = squeeze(data3v(:,:,sliceToShow));
-% %          toPlot2(find(toPlot2 < 0.7)) = 0;
-% %          toPlot3 = squeeze(data3g(:,:,sliceToShow));
-% %          toPlot3(find(toPlot3 < 0.7)) = 0;
-% %          toPlot(find(toPlot < 0.7)) = 0;
-%          set(imageHandle(i),'CData',mat2gray(squeeze(data3m(:,:,sliceToShow))));
-%          %set(imageHandle(i),'CData',mat2gray(toPlot+toPlot2+toPlot3));
-%          title(['Fig l' num2str(sliceToShow)]);
-%          i=i+1;
+        set(esa,'currentaxes',subHandle(i));
+        set(imageHandle(i),'CData',squeeze(data3v(:,:,sliceToShow)));
+         title(['Fig v ' num2str(sliceToShow)]);
+         i=i+1;
          
-%           set(esa,'currentaxes',subHandle(i));
-%           set(imageHandle(i),'CData',squeeze(data3g(:,:,sliceToShow)));
-%          title(['Fig g' num2str(sliceToShow)]);
-%          i=i+1;
+        set(esa,'currentaxes',subHandle(i));
+         set(imageHandle(i),'CData',mat2gray(squeeze(data3l(:,:,sliceToShow))));
+         title(['Fig l ' num2str(sliceToShow)]);
+         i=i+1;
+         
+          set(esa,'currentaxes',subHandle(i));
+          set(imageHandle(i),'CData',squeeze(data3g(:,:,sliceToShow)));
+         title(['Fig g' num2str(sliceToShow)]);
+         i=i+1;
 
     end
 

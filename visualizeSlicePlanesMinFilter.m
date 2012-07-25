@@ -18,7 +18,7 @@ function visualizeSlices
         for s = 1:length(data.segmented.segmentedStack)
            data3d(:,:,s) =  data.segmented.segmentedStack(s).data;
            
-           minCoronal(:,:,s) = minfilt2(data3d(:,:,s),5,'same');
+           minCoronal(:,:,s) = minfilt2(data3d(:,:,s),3,'same');
 %            minCoronal(:,:,s) = timoMinfilt(data3d(:,:,s),[5 3 3]);
         end
         
