@@ -8,7 +8,7 @@ function visualize3DsegmentationResult
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
-    for kh = 1%1:10
+    for kh = 2:10
         data = load(['Segmented' num2str(kh) '.mat']);
         
         %Original data
@@ -37,10 +37,11 @@ function visualize3DsegmentationResult
         end
 %         keyboard;
         for r = 1:size(segment3d,1)
-            segment3d(r,:,:) =  imdilate(imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack)),nHoodStack);
+            %segment3d(r,:,:) =  imdilate(imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack)),nHoodStack);
+            segment3d(r,:,:) =  imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack));
         end
         for c = 1:size(segment3d,2)
-            segment3d(:,c,:) =  imdilate(imfill(imerode(squeeze(segment3d(:,c,:)),nHoodStack)),nHoodStack);
+            segment3d(:,c,:) =  imfill(imerode(squeeze(segment3d(:,c,:)),nHoodStack));
         end
         for s = 1:size(segment3d,3)
            segment3d(:,:,s) =  imfill(imerode(squeeze(segment3d(:,:,s)),nHood));
@@ -82,19 +83,19 @@ function visualize3DsegmentationResult
         plots(1) = imshow(squeeze(segmentedVolume(:,:,1)),[]);
         temp(2) = subplot(1,2,2);
         plots(2) = imshow(squeeze(segmentedVolume(:,:,1)),[]);
-        for r = 1:size(segmentedVolume,1)
+        for r = 1:size(segmentedVolume,3)
             
             if max(max(squeeze(segmentedVolume(:,:,r)))) > 0
                 disp(['growing ' num2str(r)]);
                 set(gcf,'currentaxes',temp(1));
                 set(plots(1),'cdata',squeeze(segmentedVolume(:,:,r)));
-                javaGrow = javaLoop.RegionGrow(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
+                javaGrow = javaLoop.RegionGrow(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)),300);
                 segmentedVolume(:,:,r) = javaGrow.grown;
                 %segmentedVolume(:,:,r) = growRegion(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
                 set(gcf,'currentaxes',temp(2));
                 set(plots(2),'cdata',squeeze(segmentedVolume(:,:,r)));
                 drawnow();
-                keyboard
+%                 keyboard
             end
             
         end
