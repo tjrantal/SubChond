@@ -69,7 +69,7 @@ public class RegionGrow{
 			mask already		*/
 			if (nextPixel.cost <= maxDiff){    //If cost is still less than maxDiff
 				coordinates = nextPixel.coordinates;
-				System.out.println("r "+coordinates[0]+" c "+coordinates[1]);
+				//System.out.println("r "+coordinates[0]+" c "+coordinates[1]);
 				visited[coordinates[0]][coordinates[1]] = (byte) 1;
 				if (segmentationMask[coordinates[0]][coordinates[1]] < 1){
 					segmentationMask[coordinates[0]][coordinates[1]] = 1;
