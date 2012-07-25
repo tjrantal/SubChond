@@ -26,6 +26,7 @@ public class RegionGrow{
 		this.dataSlice = dataSlice;
 		this.segmentationMask = segmentationMask;
 		this.maxDiff = 250.0;
+		System.out.println("Constructor w/o");
 		growRegion();
 	}
 	
@@ -34,6 +35,7 @@ public class RegionGrow{
 		this.dataSlice = dataSlice;
 		this.segmentationMask = segmentationMask;
 		this.maxDiff = maxDiff;
+		System.out.println("Constructor w");
 		growRegion();
 	}
 	
@@ -45,6 +47,7 @@ public class RegionGrow{
 		visited = new byte[rowCount][columnCount];
 		currentMean = getCurrentMean();
 		
+		System.out.println("Start Init");
 		/*Init pixelQueue*/
 		int[][] seedIndices = find(segmentationMask);
 		for (int i = 0; i<seedIndices.length; ++i){
@@ -55,6 +58,7 @@ public class RegionGrow{
 		/*Grow Region*/
 		NextPixel nextPixel;
 		int[] coordinates;
+		System.out.println("Start Growing");
 		while (pixelQueue.size() > 0){ //Go through all cells in queue
 			nextPixel  = pixelQueue.poll();	/*Get the pixel with the lowest cost and remove it from the queue*/
 			/*	Add 4-connected neighbourhood to the  queue, unless the
@@ -72,8 +76,10 @@ public class RegionGrow{
 								{coordinates[0],		coordinates[1]-1},	/*Left one*/
 								{coordinates[0],		coordinates[1]+1}	/*Right one*/
 								};
+				System.out.println("Check neighbours, queue length "+pixelQueue.size());
 				checkNeighbours(neighbourhood);
 			}else{ //First pixel with higher than maxDiff cost or run out of pixels
+				System.out.println("Break");
 				break;
 			}
         
@@ -151,6 +157,43 @@ public class RegionGrow{
 
 	}	    	
 
+	/*Test*/
+	public static void main(String[] are){
+		double[][] image = {
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,500,500,500,251,249,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0}
+						};
+		double[][] mask = {
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,1,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0}
+						};
+		RegionGrow rg = new RegionGrow(image, mask);
+		rg.printGrown();
+	}
+	public void printGrown(){
+		for (int r = 0; r<grown.length;++r){
+			for (int c = 0; c<grown[r].length;++c){
+				System.out.print((int) grown[r][c]+"\t");
+			}
+			System.out.print("\n");
+		}
+	}
 }
 
 

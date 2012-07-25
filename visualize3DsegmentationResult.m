@@ -88,10 +88,13 @@ function visualize3DsegmentationResult
                 disp(['growing ' num2str(r)]);
                 set(gcf,'currentaxes',temp(1));
                 set(plots(1),'cdata',squeeze(segmentedVolume(:,:,r)));
-                segmentedVolume(:,:,r) = growRegion(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
+                javaGrow = javaLoop.RegionGrow(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
+                segmentedVolume(:,:,r) = javaGrow.grown;
+                %segmentedVolume(:,:,r) = growRegion(squeeze(data3d(:,:,r)),squeeze(segmentedVolume(:,:,r)));
                 set(gcf,'currentaxes',temp(2));
                 set(plots(2),'cdata',squeeze(segmentedVolume(:,:,r)));
                 drawnow();
+                keyboard
             end
             
         end
