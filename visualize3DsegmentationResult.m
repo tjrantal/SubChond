@@ -8,6 +8,12 @@ function visualize3DsegmentationResult
         
     nHood = strel('disk',2);
     nHoodStack = strel('rectangle',[3 3]);
+    
+    nHoodStack = zeros(3,3,3);
+    nHoodStack(:,:,1) = [0,0,0;0,1,0;0,0,0];
+    nHoodStack(:,:,2) = [1,1,1;1,1,1;1,1,1];
+    nHoodStack(:,:,3) = [0,0,0;0,1,0;0,0,0];
+    
     for kh = 1:10   %5 does not work...
         data = load(['Segmented' num2str(kh) '.mat']);
         
@@ -36,18 +42,45 @@ function visualize3DsegmentationResult
 %            imshow(segment3d(:,:,s),[]);
 %            pause
         end
-%         keyboard;
-        for r = 1:size(segment3d,1)
-            %segment3d(r,:,:) =  imdilate(imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack)),nHoodStack);
-            segment3d(r,:,:) =  imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack));
-        end
-        for c = 1:size(segment3d,2)
-            segment3d(:,c,:) =  imfill(imerode(squeeze(segment3d(:,c,:)),nHoodStack));
-        end
-        for s = 1:size(segment3d,3)
-           segment3d(:,:,s) =  imfill(imerode(squeeze(segment3d(:,:,s)),nHood));
-        end
         
+        %Erode twice for testing...
+        disp('Start eroding');
+        segment3dEroded = imerode(segment3d,nHoodStack);
+        disp('Start eroded once');
+        segment3dEroded = imerode(segment3dEroded,nHoodStack);
+        disp('Start eroded twice');
+        
+         figure
+        temp(1) = subplot(1,2,1);
+        plots(1) = imshow(squeeze(segment3d(:,:,1)),[]);
+        temp(2) = subplot(1,2,2);
+        plots(2) = imshow(squeeze(segment3dEroded(:,:,1)),[]);
+        for r = 1:size(segment3d,3)
+            
+            if max(max(squeeze(segment3d(:,:,r)))) > 0
+                disp(['eroded ' num2str(r)]);
+                set(gcf,'currentaxes',temp(1));
+                set(plots(1),'cdata',squeeze(segment3d(:,:,r)));
+                set(gcf,'currentaxes',temp(2));
+                set(plots(2),'cdata',squeeze(segment3dEroded(:,:,r)));
+                drawnow();
+               pause
+            end
+            
+        end
+        close
+% %         keyboard;
+%         for r = 1:size(segment3d,1)
+%             %segment3d(r,:,:) =  imdilate(imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack)),nHoodStack);
+%             segment3d(r,:,:) =  imfill(imerode(squeeze(segment3d(r,:,:)),nHoodStack));
+%         end
+%         for c = 1:size(segment3d,2)
+%             segment3d(:,c,:) =  imfill(imerode(squeeze(segment3d(:,c,:)),nHoodStack));
+%         end
+%         for s = 1:size(segment3d,3)
+%            segment3d(:,:,s) =  imfill(imerode(squeeze(segment3d(:,:,s)),nHood));
+%         end
+%         
         %Get connected volumes
         
         ConnectedVolumes = bwconncomp(segment3d,6); %Using 6 connected neigbourhood

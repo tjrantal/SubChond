@@ -1,6 +1,8 @@
 Project for analysing tibial subchondral bone pixel values from t1 spin echo MRI images.
 
 
+THIS PROJECT IS NOW ABANDONED. The ideas didn't pan out. The same project is continued under my RegionGrow repo.
+
 LBP functions downloaded from Center for Machine Vision Research website (http://www.cse.oulu.fi/CMV/Downloads)
 
 N.B. it is rather questionable whether subchondral bone pixel intensities may give any useful information, as e.g. osteoarthritis is known to be associated with oedema, which will cause lower pixel intensities than seen in healthy tissue...
